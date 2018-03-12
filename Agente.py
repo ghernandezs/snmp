@@ -4,6 +4,7 @@ class Agente:
 		self.version = version
 		self.comunity = comunity
 		self.port = port
+		self.isActive= False
 
 	def getHost(self):
 		return self.host
@@ -24,4 +25,10 @@ class Agente:
 	def getPort(self):
 		return self.port
 	def setPort(self,port):
-		self.port = port					
+		self.port = port
+
+	def setIsActive(self,isActive):
+		self.isActive=isActive
+
+	def getIsActive(self):
+		return self.isActive		 							

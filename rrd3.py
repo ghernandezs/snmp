@@ -7,7 +7,7 @@ tiempo_inicial = tiempo_final -25920000
 
 while 1:
     ret = rrdtool.graph( "net.png",
-                     "--start",'1504542540',
+                     "--start",'N',
  #                    "--end","N",
                      "--vertical-label=Bytes/s",
                      "DEF:inoctets=net3.rrd:inoctets:AVERAGE",
