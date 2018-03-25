@@ -1,5 +1,6 @@
 import threading
 import time
+import os
 import rrdtool
 
 from getSNMP import consultaSNMP
@@ -7,6 +8,9 @@ from getSNMP import consultaSNMP
 from Agente import Agente
 from AgenteDAO import AgenteDAO
 from Agente import Agente
+
+oidsarr = {"os":"1.3.6.1.2.1.1.1.0",
+"upTime":"1.3.6.1.2.1.1.3.0","interfacesNumber":"1.3.6.1.2.1.2.1.0","interfaceIndex":"1.3.6.1.2.1.2.2.1.","ipIn":"1.3.6.1.2.1.4.3.0","ipOut":"1.3.6.1.2.1.4.10.0"}
 
 def  addAgente():
 	agenteDAO = AgenteDAO()
@@ -60,8 +64,20 @@ def main():
 		else:
 			print "opcion no valida" 
 
-	
+def getOS(agente):
+	return consultaSNMP(agente.getComunity(),agente.getHost(),oidsarr['os'],agente.getPort())
 
+def getInterfacesNumber(agente):
+	return consultaSNMP(agente.getComunity(),agente.getHost(),oidsarr['interfacesNumber'],agente.getPort())
+
+def getInterfaceStatus(agente,i):
+		status = "up " if consultaSNMP(agente.getComunity(),agente.getHost(),oidsarr['interfaceIndex']+str(i)+".8",agente.getPort()) == 1 else "down"	
+		print  consultaSNMP(agente.getComunity(),agente.getHost(),oidsarr['interfaceIndex']+str(i)+".2",agente.getPort())+ "  "+ status	
+
+def ipStats(agente):
+	pkgIn = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['ipIn'],agente.getPort()))
+	pkgOut = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['ipOut'],agente.getPort()))
+    	
 def monitorear(agente):
 
 	total_input_traffic = 0
@@ -70,9 +86,9 @@ def monitorear(agente):
 	t = threading.currentThread()
 
 	while getattr(t, "do_run", True):
-		print agente.getHost()
-		total_input_traffic = int(consultaSNMP('comunidadSNMP','192.168.1.67','1.3.6.1.2.1.2.2.1.10.3'))
-    	total_output_traffic = int(consultaSNMP('comunidadSNMP','192.168.1.67','1.3.6.1.2.1.2.2.1.16.3'))
+		ipStats(agente)
+		#total_input_traffic = int(consultaSNMP('comunidadSNMP',agente.getHost(),'1.3.6.1.2.1.2.2.1.10.3'))
+    	#total_output_traffic = int(consultaSNMP('comunidadSNMP',agente.getHost(),'1.3.6.1.2.1.2.2.1.16.3'))
 	    #total_input_traffic = int(consultaSNMP(agente.getComunity(),agente.getHost(),'1.3.6.1.2.1.2.2.1.10.3'))
 	    #total_output_traffic = int(consultaSNMP(agente.getComunity(),agente.getHost(),'1.3.6.1.2.1.2.2.1.16.3'))
 
@@ -94,18 +110,27 @@ def createThread(agente):
 #if __name__ == "__main__":
 agenteDAO = AgenteDAO()
 l = agenteDAO.findAll()
-for agente in l:
-	print agente.getIsActive()
-	if(agente.getIsActive() == 'True'):
-		t = createThread(agente)
-		t.setName(agente.getHost())
-		t.start()
-		print t.getName()	
+try:
+	for agente in l:
+		print "***************************************************************************"
+		response = os.system("ping -c 1 " + agente.getHost())
+		if(response == 0):
+			t = createThread(agente)
+			t.setName(agente.getHost())
+			t.start()
+			intNum = getInterfacesNumber(agente)
+			print agente.getHost() +"  sistema operativo: " +getOS(agente) +" status: activo"+ "  interfaces: " + str(intNum) 
+			for i in range(0,int(intNum)):
+				getInterfaceStatus(agente,i) 
 
+		else:
+			print agente.getHost() +"  status: inactivo" 
+		print "***************************************************************************"	
+except Exception, e:
+	raise
+
+mainThread = threading.Thread(target=main())
 	
-
-#mainThread = threading.Thread(target=main())
-
 #t1 = createThread("thread1")
 #t2 = createThread("treaded2")
  
