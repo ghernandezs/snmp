@@ -49,4 +49,8 @@ class AgenteDAO:
 				else:
 					objStr="host="+agente.getHost()+",version="+agente.getVersion()+",comunidad="+agente.getComunity()+",puerto="+str(agente.getPort())+",isActive="+str(agente.getIsActive()) 
 				file.write(objStr)			
-		file.close()		
+		file.close()
+
+	def update(self,agente):
+		self.deleteByHost(agente.getHost())
+		self.save(agente)			

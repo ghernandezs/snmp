@@ -7,7 +7,7 @@ from getSNMP import consultaSNMP
 
 from Agente import Agente
 from AgenteDAO import AgenteDAO
-from Agente import Agente
+import rrdService
 
 oidsarr = {"os":"1.3.6.1.2.1.1.1.0",
 "upTime":"1.3.6.1.2.1.1.3.0","interfacesNumber":"1.3.6.1.2.1.2.1.0","interfaceIndex":"1.3.6.1.2.1.2.2.1.","ipIn":"1.3.6.1.2.1.4.3.0","ipOut":"1.3.6.1.2.1.4.10.0"}
@@ -40,6 +40,9 @@ def deleteDevice():
 	except Exception, e:
 		print e
 
+def startStopDevice():
+	print "Iniciar/Detener Aente"	
+	showAgents()
 
 def main():
 	while 1:
@@ -58,7 +61,7 @@ def main():
 		elif(opcion == 3):
 			deleteDevice()
 		elif(opcion == 4):
-			print "opcion 4"
+			startStopDevice()
 		elif(opcion == 5):
 			print "opcion 5"	
 		else:
@@ -79,30 +82,29 @@ def ipStats(agente):
 	pkgOut = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['ipOut'],agente.getPort()))
     	
 def monitorear(agente):
+ 
+  	print "monitoreando a " + agente.getHost()
 
 	total_input_traffic = 0
 	total_output_traffic = 0
 
 	t = threading.currentThread()
-
 	while getattr(t, "do_run", True):
-		ipStats(agente)
+		#ipStats(agente)
 		#total_input_traffic = int(consultaSNMP('comunidadSNMP',agente.getHost(),'1.3.6.1.2.1.2.2.1.10.3'))
-    	#total_output_traffic = int(consultaSNMP('comunidadSNMP',agente.getHost(),'1.3.6.1.2.1.2.2.1.16.3'))
-	    #total_input_traffic = int(consultaSNMP(agente.getComunity(),agente.getHost(),'1.3.6.1.2.1.2.2.1.10.3'))
-	    #total_output_traffic = int(consultaSNMP(agente.getComunity(),agente.getHost(),'1.3.6.1.2.1.2.2.1.16.3'))
-
-	    #valor = agente.getHost()+":" + str(total_input_traffic) + ':' + str(total_output_traffic)
-	    #print valor
-	    #rrdtool.update('net3.rrd', valor)
-	    #rrdtool.dump('net3.rrd','net3.xml')
-	    #time.sleep(1)
-
-	#if ret:
-   	#	print rrdtool.error()
-    #	time.sleep(300)
+		#total_output_traffic = int(consultaSNMP('comunidadSNMP',agente.getHost(),'1.3.6.1.2.1.2.2.1.16.3'))
+		total_input_traffic = int(consultaSNMP(agente.getComunity(),agente.getHost(),'1.3.6.1.2.1.2.2.1.10.3',agente.getPort()))
+		total_output_traffic = int(consultaSNMP(agente.getComunity(),agente.getHost(),'1.3.6.1.2.1.2.2.1.16.3',agente.getPort()))
+		valor ="N:"+str(total_input_traffic) #+ ':' + str(total_output_traffic)
+		print valor
+		
+	if ret:
+   		print rrdtool.error()
+    	ime.sleep(300)
 	
-
+def createReportThread(agente):
+	r = threading.Thread(target=rrdService.report, args=[agente])
+	return r
 def createThread(agente):
 	t = threading.Thread(target=monitorear, args=[agente])
 	return t			
@@ -115,15 +117,21 @@ try:
 		print "***************************************************************************"
 		response = os.system("ping -c 1 " + agente.getHost())
 		if(response == 0):
+			agente.setIsActive(True)
+			agenteDAO.update(agente)
 			t = createThread(agente)
 			t.setName(agente.getHost())
 			t.start()
+			r = createReportThread(agente)
+			r.start()
 			intNum = getInterfacesNumber(agente)
 			print agente.getHost() +"  sistema operativo: " +getOS(agente) +" status: activo"+ "  interfaces: " + str(intNum) 
 			for i in range(0,int(intNum)):
 				getInterfaceStatus(agente,i) 
 
 		else:
+			agente.setIsActive(False)
+			agenteDAO.update(agente)	
 			print agente.getHost() +"  status: inactivo" 
 		print "***************************************************************************"	
 except Exception, e:
@@ -140,5 +148,3 @@ mainThread = threading.Thread(target=main())
 #time.sleep(5)
 #t1.do_run = False
 #t2.do_run = False
-
-
