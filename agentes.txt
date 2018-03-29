@@ -1,0 +1,2 @@
+host=8.12.0.224,version=v1,comunidad=comunidadSNMP,puerto=2024,isActive=False
+host=localhost,version=v1,comunidad=comunidadSNMP,puerto=161,isActive=True

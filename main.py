@@ -10,7 +10,7 @@ from AgenteDAO import AgenteDAO
 import rrdService
 
 oidsarr = {"os":"1.3.6.1.2.1.1.1.0",
-"upTime":"1.3.6.1.2.1.1.3.0","interfacesNumber":"1.3.6.1.2.1.2.1.0","interfaceIndex":"1.3.6.1.2.1.2.2.1.","ipIn":"1.3.6.1.2.1.4.3.0","ipOut":"1.3.6.1.2.1.4.10.0"}
+"upTime":"1.3.6.1.2.1.1.3.0","interfacesNumber":"1.3.6.1.2.1.2.1.0","interfaceIndex":"1.3.6.1.2.1.2.2.1.","ipIn":"1.3.6.1.2.1.4.3.0","ipOut":"1.3.6.1.2.1.4.10.0","icmpIn":"1.3.6.1.2.1.5.1.0","icmpOut":"1.3.6.1.2.1.5.14.0","tcpCon":"1.3.6.1.2.1.6.5.0","tcpIn":"1.3.6.1.2.1.6.10.0","tcpOut":"1.3.6.1.2.1.6.11.0","snmpIn":"1.3.6.1.2.1.11.1.0","snmpOut":"1.3.6.1.2.1.11.2.0"}
 
 def  addAgente():
 	agenteDAO = AgenteDAO()
@@ -75,12 +75,7 @@ def getInterfacesNumber(agente):
 
 def getInterfaceStatus(agente,i):
 		status = "up " if consultaSNMP(agente.getComunity(),agente.getHost(),oidsarr['interfaceIndex']+str(i)+".8",agente.getPort()) == 1 else "down"	
-		print  consultaSNMP(agente.getComunity(),agente.getHost(),oidsarr['interfaceIndex']+str(i)+".2",agente.getPort())+ "  "+ status	
-
-def ipStats(agente):
-	pkgIn = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['ipIn'],agente.getPort()))
-	pkgOut = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['ipOut'],agente.getPort()))
-    	
+		print  consultaSNMP(agente.getComunity(),agente.getHost(),oidsarr['interfaceIndex']+str(i)+".2",agente.getPort())+ "  "+ status	    	
 def monitorear(agente):
  
   	print "monitoreando a " + agente.getHost()
@@ -90,17 +85,24 @@ def monitorear(agente):
 
 	t = threading.currentThread()
 	while getattr(t, "do_run", True):
-		#ipStats(agente)
-		#total_input_traffic = int(consultaSNMP('comunidadSNMP',agente.getHost(),'1.3.6.1.2.1.2.2.1.10.3'))
-		#total_output_traffic = int(consultaSNMP('comunidadSNMP',agente.getHost(),'1.3.6.1.2.1.2.2.1.16.3'))
-		total_input_traffic = int(consultaSNMP(agente.getComunity(),agente.getHost(),'1.3.6.1.2.1.2.2.1.10.3',agente.getPort()))
-		total_output_traffic = int(consultaSNMP(agente.getComunity(),agente.getHost(),'1.3.6.1.2.1.2.2.1.16.3',agente.getPort()))
-		valor ="N:"+str(total_input_traffic) #+ ':' + str(total_output_traffic)
-		print valor
 		
+		ipIn = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['ipIn'],agente.getPort()))
+		ipOut = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['ipOut'],agente.getPort()))
+		icmpIn = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['icmpIn'],agente.getPort()))
+		icmpOut = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['icmpOut'],agente.getPort()))
+		tcpCon =int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['tcpCon'],agente.getPort()))
+		tcpIn =int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['tcpIn'],agente.getPort()))
+		tcpOut = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['tcpOut'],agente.getPort()))
+		snmpIn = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['snmpIn'],agente.getPort()))
+		snmpOut = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['snmpOut'],agente.getPort()))
+		valor ='N:'+str(ipIn) + ':' + str(ipOut)+':'+str(icmpIn)+':'+str(icmpOut)+':'+ str(tcpCon)+':'+str(tcpIn)+':'+str(tcpOut)+':'+str(snmpIn)+':'+str(snmpOut) 
+		#print valor
+		rrdtool.update('dbPractica1.rrd', valor)
+    	rrdtool.dump('dbPractica1.rrd','dbPractica1.xml')
+    	time.sleep(1)
 	if ret:
    		print rrdtool.error()
-    	ime.sleep(300)
+    	time.sleep(300)
 	
 def createReportThread(agente):
 	r = threading.Thread(target=rrdService.report, args=[agente])
@@ -109,7 +111,7 @@ def createThread(agente):
 	t = threading.Thread(target=monitorear, args=[agente])
 	return t			
 
-#if __name__ == "__main__":
+
 agenteDAO = AgenteDAO()
 l = agenteDAO.findAll()
 try:
@@ -138,7 +140,6 @@ except Exception, e:
 	raise
 
 mainThread = threading.Thread(target=main())
-	
 #t1 = createThread("thread1")
 #t2 = createThread("treaded2")
  

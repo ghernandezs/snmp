@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE rrd SYSTEM "http://oss.oetiker.ch/rrdtool/rrdtool.dtd">
+<!-- Round Robin Database Dump -->
+<rrd>
+	<version>0003</version>
+	<step>20</step> <!-- Seconds -->
+	<lastupdate>1522022713</lastupdate> <!-- 2018-03-25 18:05:13 CST -->
+
+	<ds>
+		<name> ConexionesTcp </name>
+		<type> COUNTER </type>
+		<minimal_heartbeat>600</minimal_heartbeat>
+		<min>NaN</min>
+		<max>NaN</max>
+
+		<!-- PDP Status -->
+		<last_ds>406803586</last_ds>
+		<value>1.7470000000e+03</value>
+		<unknown_sec> 0 </unknown_sec>
+	</ds>
+
+	<!-- Round Robin Archives -->
+	<rra>
+		<cf>AVERAGE</cf>
+		<pdp_per_row>6</pdp_per_row> <!-- 120 seconds -->
+
+		<params>
+		<xff>5.0000000000e-01</xff>
+		</params>
+		<cdp_prep>
+			<ds>
+			<primary_value>1.1122371065e+02</primary_value>
+			<secondary_value>2.0365000000e+02</secondary_value>
+			<value>1.5910000000e+02</value>
+			<unknown_datapoints>0</unknown_datapoints>
+			</ds>
+		</cdp_prep>
+		<database>
+			<!-- 2018-03-25 17:36:00 CST / 1522020960 --> <row><v>NaN</v></row>
+			<!-- 2018-03-25 17:38:00 CST / 1522021080 --> <row><v>NaN</v></row>
+			<!-- 2018-03-25 17:40:00 CST / 1522021200 --> <row><v>NaN</v></row>
+			<!-- 2018-03-25 17:42:00 CST / 1522021320 --> <row><v>NaN</v></row>
+			<!-- 2018-03-25 17:44:00 CST / 1522021440 --> <row><v>NaN</v></row>
+			<!-- 2018-03-25 17:46:00 CST / 1522021560 --> <row><v>NaN</v></row>
+			<!-- 2018-03-25 17:48:00 CST / 1522021680 --> <row><v>NaN</v></row>
+			<!-- 2018-03-25 17:50:00 CST / 1522021800 --> <row><v>6.0251098606e+03</v></row>
+			<!-- 2018-03-25 17:52:00 CST / 1522021920 --> <row><v>1.7104561801e+04</v></row>
+			<!-- 2018-03-25 17:54:00 CST / 1522022040 --> <row><v>1.4394681506e+04</v></row>
+			<!-- 2018-03-25 17:56:00 CST / 1522022160 --> <row><v>4.5495854351e+02</v></row>
+			<!-- 2018-03-25 17:58:00 CST / 1522022280 --> <row><v>5.6554398003e+02</v></row>
+			<!-- 2018-03-25 18:00:00 CST / 1522022400 --> <row><v>3.5204899510e+02</v></row>
+			<!-- 2018-03-25 18:02:00 CST / 1522022520 --> <row><v>9.7849980881e+01</v></row>
+			<!-- 2018-03-25 18:04:00 CST / 1522022640 --> <row><v>1.1122371065e+02</v></row>
+		</database>
+	</rra>
+</rrd>
