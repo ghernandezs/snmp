@@ -42,7 +42,7 @@ def report(agente):
 	tiempo_inicial = tiempo_final -25920000
 	t = threading.currentThread()
 	while getattr(t, "do_run", True):
-		print "Reporting"
+		#print "Reporting"
 		rrdtool.graph( "paquetesIPEntrada_" + agente.getHost() + ".png",
 	             		"--start",str(tiempo_actual),
 			#"--end","N",

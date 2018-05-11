@@ -43,7 +43,8 @@ def deleteDevice():
 def startStopDevice():
 	print "Iniciar/Detener Aente"	
 	showAgents()
-
+	host = str(raw_input("ingresar host o ip"))
+	print threading.active_count()
 def main():
 	while 1:
 		print "seleccionar Opcion"
@@ -85,7 +86,7 @@ def monitorear(agente):
 
 	t = threading.currentThread()
 	while getattr(t, "do_run", True):
-		
+		print "monitoreando"
 		ipIn = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['ipIn'],agente.getPort()))
 		ipOut = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['ipOut'],agente.getPort()))
 		icmpIn = int(consultaSNMP(agente.getComunity(),agente.getHost(), oidsarr['icmpIn'],agente.getPort()))
@@ -100,15 +101,13 @@ def monitorear(agente):
 		rrdtool.update('dbPractica1.rrd', valor)
     	rrdtool.dump('dbPractica1.rrd','dbPractica1.xml')
     	time.sleep(1)
-	if ret:
-   		print rrdtool.error()
-    	time.sleep(300)
+	#if ret:
+   	#	print rrdtool.error()
+    #	time.sleep(300)
 	
-def createReportThread(agente):
-	r = threading.Thread(target=rrdService.report, args=[agente])
-	return r
-def createThread(agente):
-	t = threading.Thread(target=monitorear, args=[agente])
+
+def createThread(target,obj,name):
+	t = threading.Thread(target=target, args=[obj],name=name)
 	return t			
 
 
@@ -121,11 +120,13 @@ try:
 		if(response == 0):
 			agente.setIsActive(True)
 			agenteDAO.update(agente)
-			t = createThread(agente)
+			t = createThread(monitorear,agente,agente.getHost())
 			t.setName(agente.getHost())
 			t.start()
-			r = createReportThread(agente)
+			r = createThread(rrdService.report,agente,"reporte_"+agente.getHost())
 			r.start()
+			#time.sleep(30)
+			#t.do_run = False
 			intNum = getInterfacesNumber(agente)
 			print agente.getHost() +"  sistema operativo: " +getOS(agente) +" status: activo"+ "  interfaces: " + str(intNum) 
 			for i in range(0,int(intNum)):
